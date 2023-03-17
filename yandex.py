@@ -1,32 +1,52 @@
 import requests
 
 
-# todo: refactor class to upload not only to root
-class YaUploader:
+class YaInterface:
+    """
+    An interface to provide base Yandex url, user token and request headers
+    """
     url = 'https://cloud-api.yandex.net/v1/disk'
 
-    def __init__(self, token):
+    def __init__(self, token: str):
         self.token = token
 
-    def get_headers(self):
+    def get_headers(self) -> dict:
+        """
+        Returns dict containing headers needed for every Yandex api request
+        """
         return {
             'Accept': 'application/json',
             'Authorization': f'OAuth {self.token}'
         }
 
-    def get_upload_link(self, file_name):
+
+# todo: refactor class to upload not only to root
+class YaUploader(YaInterface):
+    """
+    Uploader interface to manage post requests and upload data to cloud disk
+    """
+    def __init__(self, interface: YaInterface):
+        super().__init__(interface.token)
+        self.url = f'{self.url}/resources/upload'
+
+    def get_upload_link(self, file_name: str) -> str:
+        """
+        Gets link needed to upload a file in cloud storage
+        :param file_name: Desired name of a file in storage
+        :return: String containing link for uploading a file
+        """
         headers = self.get_headers()
         params = {'path': f'disk:/{file_name}'}
-        response = requests.get(f'{self.url}/resources/upload',
-                                headers=headers, params=params)
-        return response.json()
+        response = requests.get(self.url, headers=headers, params=params)
+        return response.json()['href']
 
-    def upload_file_to_root(self, file):
+    # todo: refactor this method and make docstring
+    def upload_file_to_root(self, file: str) -> None:
         if '/' not in file:
-            href = self.get_upload_link(file)['href']
+            href = self.get_upload_link(file)
         else:
             name = file[file.rfind('/') + 1:]
-            href = self.get_upload_link(name)['href']
+            href = self.get_upload_link(name)
         with open(file, 'rb') as f:
             response = requests.put(href, data=f)
 
