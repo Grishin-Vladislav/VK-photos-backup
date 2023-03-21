@@ -10,8 +10,9 @@ VK_TOKEN = os.getenv('VK_TOKEN')
 
 if __name__ == '__main__':
     ya = YaInterface(YANDEX_TOKEN)
-    uploader = YaUploader(ya)
-    uploader.upload_file('README.md', 'docs/readme.txt')
-    # directory = YaDirectory(ya)
+    # uploader = YaUploader(ya)
+    # uploader.upload_file('README.md', 'docs/test.md')
+    directory = YaDirectory(ya)
+    print(directory.check_path('docs/readme.md'))
     # directory.create_folder('docs')
     # uploader.upload_file_to_root('docs/README.md')

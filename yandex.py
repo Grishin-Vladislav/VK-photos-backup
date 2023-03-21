@@ -56,6 +56,18 @@ class YaDirectory(YaInterface):
         super().__init__(interface.token)
         self.url = f'{self.url}/resources'
 
+    def check_path(self, path: str) -> bool:
+        """
+        Checks if directories or files exists
+        :param path: directory path.
+        :return: True if all directories exists, else: False.
+        """
+        params = {'path': f'disk:/{path}'}
+        response = requests.get(self.url, headers=self.headers, params=params)
+        if response.status_code == 200:
+            return True
+        return False
+
     def create_folder(self, path: str) -> None:
         """
         Creates folder by given path, last destination will be desired filename
