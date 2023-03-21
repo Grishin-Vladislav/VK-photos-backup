@@ -16,7 +16,6 @@ class YaInterface:
         }
 
 
-# todo: refactor class to upload not only to root
 class YaUploader(YaInterface):
     """
     Uploader interface to manage post requests and upload data to cloud disk
@@ -26,25 +25,41 @@ class YaUploader(YaInterface):
         super().__init__(interface.token)
         self.url = f'{self.url}/resources/upload'
 
-    def get_upload_link(self, file_name: str) -> str:
+    def get_upload_link(self, file_path: str) -> str:
         """
         Gets link needed to upload a file in cloud storage
-        :param file_name: Desired name of a file in storage
+        :param file_path: Desired path to a file in cloud storage
         :return: String containing link for uploading a file
         """
-        params = {'path': f'disk:/{file_name}'}
+        params = {'path': f'disk:/{file_path}'}
         response = requests.get(self.url, headers=self.headers, params=params)
         return response.json()['href']
 
-    # todo: refactor this method and make docstring
-    def upload_file_to_root(self, file: str) -> None:
-        if '/' not in file:
-            href = self.get_upload_link(file)
-        else:
-            name = file[file.rfind('/') + 1:]
-            href = self.get_upload_link(name)
-        with open(file, 'rb') as f:
-            response = requests.put(href, data=f)
+    def upload_file(self, local_file_path: str, destination: str) -> None:
+        """
+        Uploads file from disk to cloud with desired file name.
+        :param local_file_path: path to file to upload.
+        :param destination: desired destination in cloud,
+                must include tail -> desired file name.
+        """
+        link = self.get_upload_link(destination)
+        with open(local_file_path, 'rb') as f:
+            requests.put(link, data=f)
 
-        if response.status_code == 201:
-            print(f'successfully uploaded {file} to root directory')
+
+class YaDirectory(YaInterface):
+    """
+    Directory manager for cloud storage
+    """
+
+    def __init__(self, interface: YaInterface):
+        super().__init__(interface.token)
+        self.url = f'{self.url}/resources'
+
+    def create_folder(self, path: str) -> None:
+        """
+        Creates folder by given path, last destination will be desired filename
+        :param path: path to desired folder ex:'docs/photos/memes'
+        """
+        params = {'path': f'disk:/{path}'}
+        response = requests.put(self.url, headers=self.headers, params=params)
