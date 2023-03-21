@@ -3,20 +3,16 @@ import requests
 
 class YaInterface:
     """
-    An interface to provide base Yandex url, user token and request headers
+    An interface to provide base Yandex url,
+     user token and auth request headers
     """
     url = 'https://cloud-api.yandex.net/v1/disk'
 
     def __init__(self, token: str):
         self.token = token
-
-    def get_headers(self) -> dict:
-        """
-        Returns dict containing headers needed for every Yandex api request
-        """
-        return {
+        self.headers = {
             'Accept': 'application/json',
-            'Authorization': f'OAuth {self.token}'
+            'Authorization': f'OAuth {token}'
         }
 
 
@@ -25,6 +21,7 @@ class YaUploader(YaInterface):
     """
     Uploader interface to manage post requests and upload data to cloud disk
     """
+
     def __init__(self, interface: YaInterface):
         super().__init__(interface.token)
         self.url = f'{self.url}/resources/upload'
@@ -35,9 +32,8 @@ class YaUploader(YaInterface):
         :param file_name: Desired name of a file in storage
         :return: String containing link for uploading a file
         """
-        headers = self.get_headers()
         params = {'path': f'disk:/{file_name}'}
-        response = requests.get(self.url, headers=headers, params=params)
+        response = requests.get(self.url, headers=self.headers, params=params)
         return response.json()['href']
 
     # todo: refactor this method and make docstring
