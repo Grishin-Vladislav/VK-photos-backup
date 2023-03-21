@@ -3,7 +3,7 @@ import requests
 
 class YaInterface:
     """
-    An interface to provide base Yandex url,
+    Interface to provide base Yandex url,
      user token and auth request headers
     """
     url = 'https://cloud-api.yandex.net/v1/disk'
@@ -18,7 +18,7 @@ class YaInterface:
 
 class YaUploader(YaInterface):
     """
-    Uploader interface to manage post requests and upload data to cloud disk
+    Interface to manage post requests and upload data to cloud disk
     """
 
     def __init__(self, interface: YaInterface):
@@ -75,3 +75,4 @@ class YaDirectory(YaInterface):
         """
         params = {'path': f'disk:/{path}'}
         response = requests.put(self.url, headers=self.headers, params=params)
+        pass
