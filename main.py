@@ -86,10 +86,12 @@ def get_meta_from_photo_album(album: dict, amount: dict) -> dict:
     return meta
 
 
-def make_directories_in_cloud(photo_data: dict) -> None:
+def make_directories_in_cloud(photo_data: dict, dir_manager: YaDirectory) -> None:
+    # todo: make this func to create folder with the name of user, refactor get_meta() for this to include credentials
     """
-    Prepares directories on Yandex cloud drive for album
-    :param photo_data: meta data of photo album
+    Prepares directories on Yandex cloud drive for album.
+    :param photo_data: metadata of photo album.
+    :param dir_manager: instance of YaDirectory, to manage folders with.
     """
     pass
 
@@ -107,4 +109,6 @@ if __name__ == '__main__':
         amount = int(input(f'В альбоме {profile_photos["response"]["count"]}'
                            f' фото, сколько последних фото сохранить?\n'))
         meta = get_meta_from_photo_album(profile_photos, amount)
-        make_directories_in_cloud(meta)
+
+        directory_manager = YaDirectory(ya)
+        make_directories_in_cloud(meta, directory_manager)
