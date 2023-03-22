@@ -86,6 +86,14 @@ def get_meta_from_photo_album(album: dict, amount: dict) -> dict:
     return meta
 
 
+def make_directories_in_cloud(photo_data: dict) -> None:
+    """
+    Prepares directories on Yandex cloud drive for album
+    :param photo_data: meta data of photo album
+    """
+    pass
+
+
 if __name__ == '__main__':
     vk = VkInterface(VK_TOKEN)
     ya = YaInterface(YANDEX_TOKEN)
@@ -93,11 +101,10 @@ if __name__ == '__main__':
     user_id = input('Введите id пользователя Вконтакте: \n')  # 3383304
     user_interface = VkUsers(vk)
 
-    # pprint(user.get_user_info(user_id))  # test
     if is_valid_user_id(user_id, user_interface):
         photo_manager = VkPhotos(vk)
         profile_photos = photo_manager.get_profile_photos(user_id)
         amount = int(input(f'В альбоме {profile_photos["response"]["count"]}'
                            f' фото, сколько последних фото сохранить?\n'))
         meta = get_meta_from_photo_album(profile_photos, amount)
-        pprint(meta)
+        make_directories_in_cloud(meta)
