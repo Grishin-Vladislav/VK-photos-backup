@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 
@@ -38,6 +40,7 @@ class VkPhotos(VkInterface):
             'rev': 1
         }
         response = requests.get(self.url, params=params)
+        time.sleep(0.33)
         return response.json()
 
 
@@ -62,4 +65,5 @@ class VkUsers(VkInterface):
             'user_ids': user_id
         }
         response = requests.get(self.url, params=params)
+        time.sleep(0.33)
         return response.json()
