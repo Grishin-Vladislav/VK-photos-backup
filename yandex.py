@@ -29,6 +29,7 @@ class YaUploader(YaInterface):
         """
         Gets link needed to upload a file in cloud storage
         :param file_path: Desired path to a file in cloud storage
+                        ex:'docs/photos/meme.jpg'
         :return: String containing link for uploading a file
         """
         params = {'path': f'disk:/{file_path}'}
@@ -40,7 +41,7 @@ class YaUploader(YaInterface):
         Uploads file from url to cloud with desired file name.
         :param link_to_file: url to file to upload.
         :param destination: desired destination in cloud,
-                must include tail -> desired file name.
+                ex:'docs/photos/meme.jpg'.
         """
         link = self.get_upload_link(destination)
         response = requests.get(link_to_file)
@@ -59,7 +60,7 @@ class YaDirectory(YaInterface):
     def check_path(self, path: str) -> bool:
         """
         Checks if directories or files exists
-        :param path: directory path.
+        :param path: directory path, ex:'docs/photos/meme.jpg'
         :return: True if all directories exists, else: False.
         """
         params = {'path': f'disk:/{path}'}
@@ -69,11 +70,9 @@ class YaDirectory(YaInterface):
         return False
 
     def create_folder(self, path: str) -> None:
-        # todo: fill this func
         """
-        Creates folder by given path, last destination will be desired filename
+        Creates folder by given path, last destination will be desired folder
         :param path: path to desired folder ex:'docs/photos/memes'
         """
         params = {'path': f'disk:/{path}'}
         response = requests.put(self.url, headers=self.headers, params=params)
-        pass
