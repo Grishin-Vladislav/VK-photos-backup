@@ -36,38 +36,50 @@ def is_valid_user_id(user_id: str, user_interface: VkUsers) -> bool:
     return False
 
 
-def get_profile_album(user_id: str, photo_interface: VkPhotos) -> dict:
+def get_meta_from_photo_album(album: dict, amount: dict) -> dict:
     """
-    Get short info about user's profile album.
-    :param user_id: desired vk profile id.
-    :param photo_interface: instance of VkPhotos class.
-    :return: dictionary with info about album.
+    Forms metadata needed to upload files to cloud.
+    :param album: dictionary from vkapi request.
+    :param amount: desired amount of photos to upload.
+    :return:
     """
-    raw_data = photo_interface.get_profile_photos(user_id)
-    info = {'count': int(raw_data['response']['count']), 'items': []}
-    for item in raw_data['response']['items']:
-        album_photo = {
-            'date': datetime.fromtimestamp(item['date']).strftime('%d.%m.%Y_%H.%M'),
-            'likes': int(item['likes']['count']),
+    meta = {}
+    for indx, item in enumerate(album['response']['items'][:amount], 1):
+        date = datetime.fromtimestamp(item['date']).strftime('%d.%m.%Y_%H.%M')
+        likes = int(item['likes']['count'])
+        meta[f'photo{indx}'] = {
+            'date': date,
+            'likes': likes,
             'photo': {
                 'type': item['sizes'][-1]['type'],
                 'url': item['sizes'][-1]['url']
             }
         }
-        info['items'].append(album_photo)
-    return info
+
+    likes = [i['likes'] for i in meta.values()]
+
+    for photo in meta.keys():
+        photo_likes = meta[photo]['likes']
+        date = meta[photo]['date']
+        if photo_likes in likes and likes.count(photo_likes) > 1:
+            meta[photo]['filename'] = f'{photo_likes}_{date}.jpg'
+        else:
+            meta[photo]['filename'] = f'{photo_likes}.jpg'
+
+    return meta
 
 
 if __name__ == '__main__':
     vk = VkInterface(VK_TOKEN)
     ya = YaInterface(YANDEX_TOKEN)
 
-    user_id = input('Введите id пользователя Вконтакте: \n')
+    user_id = input('Введите id пользователя Вконтакте: \n')  # 3383304
     user_interface = VkUsers(vk)
 
     # pprint(user.get_user_info(user_id))  # test
     if is_valid_user_id(user_id, user_interface):
         photo_manager = VkPhotos(vk)
-        profile_photos = get_profile_album(user_id, photo_manager)
-        amount = input(f'В альбоме {profile_photos["count"]} фото, '
-                       f'сколько последних фото сохранить?\n')
+        profile_photos = photo_manager.get_profile_photos(user_id)
+        amount = int(input(f'В альбоме {profile_photos["response"]["count"]}'
+                           f' фото, сколько последних фото сохранить?\n'))
+        meta = get_meta_from_photo_album(profile_photos, amount)
