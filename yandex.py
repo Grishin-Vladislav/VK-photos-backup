@@ -35,16 +35,16 @@ class YaUploader(YaInterface):
         response = requests.get(self.url, headers=self.headers, params=params)
         return response.json()['href']
 
-    def upload_file(self, local_file_path: str, destination: str) -> None:
+    def upload_file(self, link_to_file: str, destination: str) -> None:
         """
-        Uploads file from disk to cloud with desired file name.
-        :param local_file_path: path to file to upload.
+        Uploads file from url to cloud with desired file name.
+        :param link_to_file: url to file to upload.
         :param destination: desired destination in cloud,
                 must include tail -> desired file name.
         """
         link = self.get_upload_link(destination)
-        with open(local_file_path, 'rb') as f:
-            requests.put(link, data=f)
+        response = requests.get(link_to_file)
+        requests.put(link, data=response.content)
 
 
 class YaDirectory(YaInterface):
@@ -69,6 +69,7 @@ class YaDirectory(YaInterface):
         return False
 
     def create_folder(self, path: str) -> None:
+        # todo: fill this func
         """
         Creates folder by given path, last destination will be desired filename
         :param path: path to desired folder ex:'docs/photos/memes'
