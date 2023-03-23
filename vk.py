@@ -3,6 +3,12 @@ import time
 import requests
 
 
+class VkApi:
+    def __init__(self, token: str):
+        self.photos = VkPhotos(token)
+        self.users = VkUsers(token)
+
+
 class VkInterface:
     """
     Interface to provide base VK url,
@@ -22,8 +28,9 @@ class VkPhotos(VkInterface):
     """
     Interface to get photo's info from user albums
     """
-    def __init__(self, interface: VkInterface):
-        super().__init__(interface.token)
+
+    def __init__(self, token: str):
+        super().__init__(token)
         self.url = f'{self.url}/photos.get'
 
     def get_profile_photos(self, user_id: str) -> dict:
@@ -49,8 +56,8 @@ class VkUsers(VkInterface):
     Interface to manage user data
     """
 
-    def __init__(self, interface: VkInterface):
-        super().__init__(interface.token)
+    def __init__(self, token: str):
+        super().__init__(token)
         self.url = f'{self.url}/users.get'
 
     def get_user_info(self, user_id: str) -> dict:

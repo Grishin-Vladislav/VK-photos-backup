@@ -1,6 +1,12 @@
 import requests
 
 
+class YandexApi:
+    def __init__(self, token: str):
+        self.uploader = YaUploader(token)
+        self.directory = YaDirectory(token)
+
+
 class YaInterface:
     """
     Interface to provide base Yandex url,
@@ -21,8 +27,8 @@ class YaUploader(YaInterface):
     Interface to manage post requests and upload data to cloud disk
     """
 
-    def __init__(self, interface: YaInterface):
-        super().__init__(interface.token)
+    def __init__(self, token: str):
+        super().__init__(token)
         self.url = f'{self.url}/resources/upload'
 
     def get_upload_link(self, file_path: str) -> str:
@@ -53,8 +59,8 @@ class YaDirectory(YaInterface):
     Directory manager for cloud storage
     """
 
-    def __init__(self, interface: YaInterface):
-        super().__init__(interface.token)
+    def __init__(self, token: str):
+        super().__init__(token)
         self.url = f'{self.url}/resources'
 
     def check_path(self, path: str) -> bool:
@@ -75,4 +81,4 @@ class YaDirectory(YaInterface):
         :param path: path to desired folder ex:'docs/photos/memes'
         """
         params = {'path': f'disk:/{path}'}
-        response = requests.put(self.url, headers=self.headers, params=params)
+        requests.put(self.url, headers=self.headers, params=params)
