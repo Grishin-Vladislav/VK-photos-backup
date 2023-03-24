@@ -78,7 +78,7 @@ class YaDirectory(YaInterface):
         super().__init__(token)
         self.url = f'{self.url}/resources'
 
-    def check_path(self, path: str) -> bool:
+    def is_path_exists(self, path: str) -> bool:
         """
         Checks if directories or files exists
         :param path: directory path, ex:'docs/photos/meme.jpg'

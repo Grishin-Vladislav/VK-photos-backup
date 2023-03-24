@@ -108,10 +108,10 @@ class YaDiskBackuper:
         """
         root = 'vk_photos_backup'
         user_folder = meta['name']
-        if not self.__yandex.directory.check_path(root):
+        if not self.__yandex.directory.is_path_exists(root):
             self.__yandex.directory.create_folder(root)
             self.__yandex.directory.create_folder(f'{root}/{user_folder}')
-        elif not self.__yandex.directory.check_path(f'{root}/{user_folder}'):
+        elif not self.__yandex.directory.is_path_exists(f'{root}/{user_folder}'):
             self.__yandex.directory.create_folder(f'{root}/{user_folder}')
         else:
             pass
