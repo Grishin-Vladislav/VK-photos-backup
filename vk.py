@@ -1,5 +1,4 @@
 import time
-
 import requests
 
 
@@ -59,6 +58,17 @@ class VkUsers(VkInterface):
     def __init__(self, token: str):
         super().__init__(token)
         self.url = f'{self.url}/users.get'
+
+    def get_user_full_name(self, user_id: str) -> str:
+        """
+        gets profile page credentials from user id
+        :param user_id: desired user id
+        :return: string ex. 'Павел Дуров'
+        """
+        profile_info = self.get_user_info(user_id)
+        name = profile_info['response'][0]['first_name']
+        surname = profile_info['response'][0]['last_name']
+        return f'{name} {surname}'
 
     def get_user_info(self, user_id: str) -> dict:
         """
