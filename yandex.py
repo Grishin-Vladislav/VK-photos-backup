@@ -44,7 +44,7 @@ class YaUploader(YaInterface):
         time.sleep(0.2)
         return response.json()['href']
 
-    def upload_file(self, link_to_file: str, destination: str) -> None:
+    def upload_file_from_url(self, link_to_file: str, destination: str) -> None:
         """
         Uploads file from url to cloud with desired file name.
         :param link_to_file: url to file to upload.
@@ -55,6 +55,17 @@ class YaUploader(YaInterface):
         response = requests.get(link_to_file)
         time.sleep(0.2)
         requests.put(link, data=response.content)
+        time.sleep(0.2)
+
+    def upload_from_data(self, data, destination: str) -> None:
+        """
+        uploads file straight from json object
+        :param data: any python object
+        :param destination: desired destination in cloud,
+                ex:'docs/photos/meme.jpg'.
+        """
+        link = self.get_upload_link(destination)
+        requests.put(link, data=data)
         time.sleep(0.2)
 
 

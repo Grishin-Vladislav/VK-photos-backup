@@ -1,6 +1,7 @@
 from yandex import YandexApi
 from vk import VkApi
 from datetime import datetime
+import json
 
 
 class YaDiskBackuper:
@@ -23,6 +24,8 @@ class YaDiskBackuper:
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
         self.make_directories_in_cloud(meta)
         self.upload_photos_to_yadisk(meta)
+        result = self.upload_json_to_yadisk(meta)
+        print(result)
 
     def is_valid_user_id(self, user_id: str) -> bool:
         """
@@ -81,7 +84,7 @@ class YaDiskBackuper:
                 'date': date,
                 'likes': likes,
                 'photo': {
-                    'type': res_type,
+                    'type': res_type[0],
                     'url': url
                 }
             })
@@ -122,4 +125,22 @@ class YaDiskBackuper:
         for photo in meta['items']:
             full_path = f'{base_path}/{photo["filename"]}'
             link = photo['photo']['url']
-            self.__yandex.uploader.upload_file(link, full_path)
+            self.__yandex.uploader.upload_file_from_url(link, full_path)
+
+    def upload_json_to_yadisk(self, meta: dict) -> json:
+        """
+        refactors meta and uploads it to yadisk
+        :param meta: metadata of photo album.
+        :return json: returns clean metadata including filename and size type
+        """
+        clean_meta = []
+        for photo in meta['items']:
+            data = {
+                'filename': photo['filename'],
+                'size': photo['photo']['type']
+            }
+            clean_meta.append(data)
+        clean_meta = json.dumps(clean_meta, indent=4, ensure_ascii=False)
+        path = f'vk_photos_backup/{meta["name"]}/meta.json'
+        self.__yandex.uploader.upload_from_data(clean_meta, path)
+        return clean_meta
