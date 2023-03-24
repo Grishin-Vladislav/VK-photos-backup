@@ -2,6 +2,7 @@ from yandex import YandexApi
 from vk import VkApi
 from datetime import datetime
 import json
+from tqdm import tqdm
 
 
 class YaDiskBackuper:
@@ -14,17 +15,33 @@ class YaDiskBackuper:
         Backups photos from __vk page album to __yandex cloud drive by user id
         :param user_id: Vk user id
         """
+        print('Проверка информации о пользователе...')
         if not self.is_valid_user_id(user_id):
             return
-
         user_name = self.__vk.users.get_user_full_name(user_id)
+
+        print('Получение альбома пользователя...')
         photo_album = self.__vk.photos.get_profile_photos(user_id)
+        print('ОК')
+
         amount = int(input(f'В альбоме {photo_album["response"]["count"]}'
                            f' фото, сколько последних фото сохранить?\n'))
+
+        print('Подготовка метаданных для загрузки...')
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
+        print('ОК')
+
+        print('Подготовка директорий в облаке...')
         self.make_directories_in_cloud(meta)
+        print('ОК')
+
+        print('Загрузка фото в облачное хранилище...')
         self.upload_photos_to_yadisk(meta)
+        print('ОК')
+
+        print('Сохранение данных о загруженных фотографиях...')
         result = self.upload_json_to_yadisk(meta)
+        print('ОК')
         print(result)
 
     def is_valid_user_id(self, user_id: str) -> bool:
@@ -122,7 +139,7 @@ class YaDiskBackuper:
         :param meta: metadata of photo album.
         """
         base_path = f'vk_photos_backup/{meta["name"]}'
-        for photo in meta['items']:
+        for photo in tqdm(meta['items'], desc='progress'):
             full_path = f'{base_path}/{photo["filename"]}'
             link = photo['photo']['url']
             self.__yandex.uploader.upload_file_from_url(link, full_path)

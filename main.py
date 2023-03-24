@@ -14,5 +14,3 @@ if __name__ == '__main__':
     user_id = input('Введите id пользователя Вконтакте: \n')  # 3383304
 
     backup.backup(user_id)
-
-
