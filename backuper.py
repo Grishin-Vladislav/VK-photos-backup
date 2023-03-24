@@ -98,9 +98,9 @@ class YaDiskBackuper:
         return meta
 
     def make_directories_in_cloud(self, meta: dict) -> None:
-        # todo: make this func to create folder with the name of user, refactor get_meta() for this to include credentials
+        # todo: make this func to create folder with the name of user
         """
         Prepares directories on Yandex cloud drive for album.
         :param meta: metadata of photo album.
         """
-        pass
+        self.__yandex.directory.check_path('vk_photos_backup')

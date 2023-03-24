@@ -1,4 +1,5 @@
 import requests
+import time
 
 
 class YandexApi:
@@ -40,6 +41,7 @@ class YaUploader(YaInterface):
         """
         params = {'path': f'disk:/{file_path}'}
         response = requests.get(self.url, headers=self.headers, params=params)
+        time.sleep(0.2)
         return response.json()['href']
 
     def upload_file(self, link_to_file: str, destination: str) -> None:
@@ -51,7 +53,9 @@ class YaUploader(YaInterface):
         """
         link = self.get_upload_link(destination)
         response = requests.get(link_to_file)
+        time.sleep(0.2)
         requests.put(link, data=response.content)
+        time.sleep(0.2)
 
 
 class YaDirectory(YaInterface):
@@ -71,6 +75,7 @@ class YaDirectory(YaInterface):
         """
         params = {'path': f'disk:/{path}'}
         response = requests.get(self.url, headers=self.headers, params=params)
+        time.sleep(0.2)
         if response.status_code == 200:
             return True
         return False
@@ -82,3 +87,4 @@ class YaDirectory(YaInterface):
         """
         params = {'path': f'disk:/{path}'}
         requests.put(self.url, headers=self.headers, params=params)
+        time.sleep(0.2)
