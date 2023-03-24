@@ -21,7 +21,7 @@ class YaDiskBackuper:
         amount = int(input(f'В альбоме {photo_album["response"]["count"]}'
                            f' фото, сколько последних фото сохранить?\n'))
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
-        return meta
+        self.make_directories_in_cloud(meta)
 
     def is_valid_user_id(self, user_id: str) -> bool:
         """
@@ -98,9 +98,16 @@ class YaDiskBackuper:
         return meta
 
     def make_directories_in_cloud(self, meta: dict) -> None:
-        # todo: make this func to create folder with the name of user
         """
         Prepares directories on Yandex cloud drive for album.
         :param meta: metadata of photo album.
         """
-        self.__yandex.directory.check_path('vk_photos_backup')
+        root = 'vk_photos_backup'
+        user_folder = meta['name']
+        if not self.__yandex.directory.check_path(root):
+            self.__yandex.directory.create_folder(root)
+            self.__yandex.directory.create_folder(f'{root}/{user_folder}')
+        elif not self.__yandex.directory.check_path(f'{root}/{user_folder}'):
+            self.__yandex.directory.create_folder(f'{root}/{user_folder}')
+        else:
+            pass
