@@ -22,6 +22,7 @@ class YaDiskBackuper:
                            f' фото, сколько последних фото сохранить?\n'))
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
         self.make_directories_in_cloud(meta)
+        self.upload_photos_to_yadisk(meta)
 
     def is_valid_user_id(self, user_id: str) -> bool:
         """
@@ -111,3 +112,14 @@ class YaDiskBackuper:
             self.__yandex.directory.create_folder(f'{root}/{user_folder}')
         else:
             pass
+
+    def upload_photos_to_yadisk(self, meta: dict) -> None:
+        """
+        Extracts needed data from meta and upload files to yadisk.
+        :param meta: metadata of photo album.
+        """
+        base_path = f'vk_photos_backup/{meta["name"]}'
+        for photo in meta['items']:
+            full_path = f'{base_path}/{photo["filename"]}'
+            link = photo['photo']['url']
+            self.__yandex.uploader.upload_file(link, full_path)
