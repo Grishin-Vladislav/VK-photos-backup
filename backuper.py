@@ -25,8 +25,14 @@ class YaDiskBackuper:
         photo_album = self.__vk.photos.get_profile_photos(user_id)
         print('ОК', flush=True)
 
-        amount = int(input(f'В альбоме {photo_album["response"]["count"]}'
-                           f' фото, сколько последних фото сохранить?\n'))
+        while True:
+            total = photo_album["response"]["count"]
+            amount = input(f'В альбоме {total} фото, сколько последних'
+                               f' фото сохранить?\n')
+            if self.is_valid_amount(amount, total):
+                amount = int(amount)
+                break
+            print('Некорректный ввод')
 
         print('Подготовка метаданных для загрузки...', flush=True)
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
@@ -66,6 +72,18 @@ class YaDiskBackuper:
             print('Профиль пользователя подходит')
             return True
 
+        return False
+
+    @staticmethod
+    def is_valid_amount(amount: str, total: int) -> bool:
+        """
+        Checks if entered valid number of photos.
+        :param amount: desired amount of photos.
+        :param total: max photos in album.
+        :return: True if instance is valid else False.
+        """
+        if amount.isdigit() and 0 <= int(amount) <= total:
+            return True
         return False
 
     @staticmethod
