@@ -11,6 +11,6 @@ VK_TOKEN = os.getenv('VK_TOKEN')
 if __name__ == '__main__':
     backup = YaDiskBackuper(VK_TOKEN, YANDEX_TOKEN)
 
-    user_id = input('Введите id пользователя Вконтакте: \n')  # 3383304
+    user_id = input('Введите id пользователя Вконтакте: \n')
 
     backup.backup(user_id)
