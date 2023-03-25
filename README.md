@@ -15,7 +15,12 @@ python3 -m venv myenv
 ```bash
 source myenv/bin/activate
 ```
-#### 5. Create .env file and input your vk token and yandex disk token:
+#### 5. With venv activated install needed requirements:
+```bash
+pip install -r requirements.txt
+```
+
+#### 6. Create .env file in project directory and input your vk token and yandex disk token:
 ```text
 YANDEX_TOKEN=heregoesyourtoken
 VK_TOKEN=heregoesyourtoken
