@@ -10,44 +10,45 @@ class YaDiskBackuper:
         self.__yandex = YandexApi(ya_token)
         self.__vk = VkApi(vk_token)
 
-    def backup(self, user_id) -> None:
+    def backup(self) -> None:
         """
-        Backups photos from __vk page album to __yandex cloud drive by user id
-        :param user_id: Vk user id
+        Backups photos from vk page album to yandex cloud drive by user id
         """
-        print('Проверка информации о пользователе...')
-        if not self.is_valid_user_id(user_id):
-            return
+        while True:
+            user_id = input('Введите id пользователя Вконтакте: \n')
+            print('Проверка информации о пользователе...', flush=True)
+            if self.is_valid_user_id(user_id):
+                break
         user_name = self.__vk.users.get_user_full_name(user_id)
 
-        print('Получение альбома пользователя...')
+        print('Получение альбома пользователя...', flush=True)
         photo_album = self.__vk.photos.get_profile_photos(user_id)
-        print('ОК')
+        print('ОК', flush=True)
 
         amount = int(input(f'В альбоме {photo_album["response"]["count"]}'
                            f' фото, сколько последних фото сохранить?\n'))
 
-        print('Подготовка метаданных для загрузки...')
+        print('Подготовка метаданных для загрузки...', flush=True)
         meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
-        print('ОК')
+        print('ОК', flush=True)
 
-        print('Подготовка директорий в облаке...')
+        print('Подготовка директорий в облаке...', flush=True)
         self.make_directories_in_cloud(meta)
-        print('ОК')
+        print('ОК', flush=True)
 
-        print('Загрузка фото в облачное хранилище...')
+        print('Загрузка фото в облачное хранилище...', flush=True)
         self.upload_photos_to_yadisk(meta)
-        print('ОК')
+        print('ОК', flush=True)
 
-        print('Сохранение данных о загруженных фотографиях...')
+        print('Сохранение данных о загруженных фотографиях...', flush=True)
         result = self.upload_json_to_yadisk(meta)
-        print('ОК')
+        print('ОК', flush=True)
         print(result)
 
     def is_valid_user_id(self, user_id: str) -> bool:
         """
         Check if entered id is correct and profile is open.
-        :param user_id: desired __vk profile id.
+        :param user_id: desired vk profile id.
         :return: True if user has desired info else False.
         """
         profile_info = self.__vk.users.get_user_info(user_id)
@@ -128,7 +129,8 @@ class YaDiskBackuper:
         if not self.__yandex.directory.is_path_exists(root):
             self.__yandex.directory.create_folder(root)
             self.__yandex.directory.create_folder(f'{root}/{user_folder}')
-        elif not self.__yandex.directory.is_path_exists(f'{root}/{user_folder}'):
+        elif not self.__yandex.directory.is_path_exists(
+                f'{root}/{user_folder}'):
             self.__yandex.directory.create_folder(f'{root}/{user_folder}')
         else:
             pass
