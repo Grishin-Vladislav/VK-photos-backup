@@ -17,7 +17,7 @@ class YaDiskBackuper:
         while True:
             user_id = input('Введите id пользователя Вконтакте: \n')
             print('Проверка информации о пользователе...', flush=True)
-            if self.is_valid_user_id(user_id):
+            if self.__is_valid_user_id(user_id):
                 break
         user_name = self.__vk.users.get_user_full_name(user_id)
 
@@ -28,30 +28,30 @@ class YaDiskBackuper:
         while True:
             total = photo_album["response"]["count"]
             amount = input(f'В альбоме {total} фото, сколько последних'
-                               f' фото сохранить?\n')
-            if self.is_valid_amount(amount, total):
+                           f' фото сохранить?\n')
+            if self.__is_valid_amount(amount, total):
                 amount = int(amount)
                 break
             print('Некорректный ввод')
 
         print('Подготовка метаданных для загрузки...', flush=True)
-        meta = self.get_meta_from_photo_album(user_name, photo_album, amount)
+        meta = self.__get_meta_from_photo_album(photo_album, amount)
         print('ОК', flush=True)
 
         print('Подготовка директорий в облаке...', flush=True)
-        self.make_directories_in_cloud(meta)
+        self.__make_directories_in_cloud(user_name)
         print('ОК', flush=True)
 
         print('Загрузка фото в облачное хранилище...', flush=True)
-        self.upload_photos_to_yadisk(meta)
+        self.__upload_photos_to_yadisk(meta, user_name)
         print('ОК', flush=True)
 
         print('Сохранение данных о загруженных фотографиях...', flush=True)
-        result = self.upload_json_to_yadisk(meta)
+        result = self.__upload_json_to_yadisk(meta, user_name)
         print('ОК', flush=True)
         print(result)
 
-    def is_valid_user_id(self, user_id: str) -> bool:
+    def __is_valid_user_id(self, user_id: str) -> bool:
         """
         Check if entered id is correct and profile is open.
         :param user_id: desired vk profile id.
@@ -75,7 +75,7 @@ class YaDiskBackuper:
         return False
 
     @staticmethod
-    def is_valid_amount(amount: str, total: int) -> bool:
+    def __is_valid_amount(amount: str, total: int) -> bool:
         """
         Checks if entered valid number of photos.
         :param amount: desired amount of photos.
@@ -87,15 +87,14 @@ class YaDiskBackuper:
         return False
 
     @staticmethod
-    def get_meta_from_photo_album(name: str, album: dict, amount: int) -> dict:
+    def __get_meta_from_photo_album(album: dict, amount: int) -> dict:
         """
         Forms metadata needed to upload files to Yandex cloud.
-        :param name: user's credentials ex. 'Павел Дуров'.
         :param album: dictionary from vkapi/photos.get request.
         :param amount: desired amount of photos to upload.
         :return: dictionary with metadata which also includes filename.
         """
-        meta = {'name': name, 'items': []}
+        meta = {'items': []}
         for item in album['response']['items'][:amount]:
             date = datetime.fromtimestamp(item['date']).strftime(
                 '%d.%m.%Y_%H.%M')
@@ -137,38 +136,39 @@ class YaDiskBackuper:
 
         return meta
 
-    def make_directories_in_cloud(self, meta: dict) -> None:
+    def __make_directories_in_cloud(self, folder_name: str) -> None:
         """
         Prepares directories on Yandex cloud drive for album.
-        :param meta: metadata of photo album.
+        :param folder_name: name of the destination folder.
         """
         root = 'vk_photos_backup'
-        user_folder = meta['name']
         if not self.__yandex.directory.is_path_exists(root):
             self.__yandex.directory.create_folder(root)
-            self.__yandex.directory.create_folder(f'{root}/{user_folder}')
+            self.__yandex.directory.create_folder(f'{root}/{folder_name}')
         elif not self.__yandex.directory.is_path_exists(
-                f'{root}/{user_folder}'):
-            self.__yandex.directory.create_folder(f'{root}/{user_folder}')
+                f'{root}/{folder_name}'):
+            self.__yandex.directory.create_folder(f'{root}/{folder_name}')
         else:
             pass
 
-    def upload_photos_to_yadisk(self, meta: dict) -> None:
+    def __upload_photos_to_yadisk(self, meta: dict, folder_name: str) -> None:
         """
         Extracts needed data from meta and upload files to yadisk.
         :param meta: metadata of photo album.
+        :param folder_name: name of the destination.
         """
-        base_path = f'vk_photos_backup/{meta["name"]}'
+        base_path = f'vk_photos_backup/{folder_name}'
         for photo in tqdm(meta['items'], desc='progress'):
             full_path = f'{base_path}/{photo["filename"]}'
             link = photo['photo']['url']
             self.__yandex.uploader.upload_file_from_url(link, full_path)
 
-    def upload_json_to_yadisk(self, meta: dict) -> json:
+    def __upload_json_to_yadisk(self, meta: dict, folder_name: str) -> json:
         """
         refactors meta and uploads it to yadisk
         :param meta: metadata of photo album.
-        :return json: returns clean metadata including filename and size type
+        :param folder_name: name of destination folder.
+        :return json: returns clean metadata including filename and size type.
         """
         clean_meta = []
         for photo in meta['items']:
@@ -178,6 +178,6 @@ class YaDiskBackuper:
             }
             clean_meta.append(data)
         clean_meta = json.dumps(clean_meta, indent=4, ensure_ascii=False)
-        path = f'vk_photos_backup/{meta["name"]}/meta.json'
+        path = f'vk_photos_backup/{folder_name}/meta.json'
         self.__yandex.uploader.upload_from_data(clean_meta, path)
         return clean_meta
